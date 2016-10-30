@@ -384,13 +384,13 @@ impl<'a> Canvas<'a> {
                             };
                         }
                     }
-                    glutin::Event::MouseMoved((x, y)) => {
+                    glutin::Event::MouseMoved(x, y) => {
                         let pixel_pos = self.renderer.screen_to_canvas(V2(x, y));
                         self.mouse_pos = pixel_pos.map(|x| x as f32);
                         return Event::MouseMoved((pixel_pos.0, pixel_pos.1));
                     }
-                    glutin::Event::MouseWheel(x, _) => {
-                        return Event::MouseWheel(x as i32);
+                    glutin::Event::MouseWheel(glutin::MouseScrollDelta::LineDelta(_, y), _) => {
+                        return Event::MouseWheel(y as i32);
                     }
                     glutin::Event::MouseInput(state, button) => {
                         let button = match button {

@@ -1,7 +1,7 @@
 use std::default::Default;
 use num::{Float};
 use image;
-use glium::{self, texture, framebuffer, render_buffer, Surface};
+use glium::{self, texture, framebuffer, Surface};
 use glium::LinearBlendingFactor::*;
 use super::{CanvasMagnify};
 use ::{V2, Rect};
@@ -40,21 +40,23 @@ impl<'a> Renderer<'a> {
             include_str!("blit.vert"),
             include_str!("blit.frag"),
             None).unwrap();
-        let atlas = texture::Texture2d::new(display, texture_image);
+        let atlas = texture::Texture2d::new(display, texture_image).unwrap();
 
         let buffer = texture::Texture2d::new_empty(
             display,
             texture::UncompressedFloatFormat::U8U8U8U8,
-            size.0, size.1);
-        let depth = render_buffer::DepthRenderBuffer::new(
-            display, texture::DepthFormat::F32, size.0, size.1);
+            size.0, size.1).unwrap();
+        let depth = framebuffer::DepthRenderBuffer::new(
+            display, texture::DepthFormat::F32, size.0, size.1).unwrap();
 
         let mut params: glium::DrawParameters = Default::default();
-        params.backface_culling = glium::BackfaceCullingMode::CullCounterClockWise;
-        params.depth_test = glium::DepthTest::IfLessOrEqual;
-        params.depth_write = true;
-        params.blending_function = Some(glium::BlendingFunction::Addition {
-            source: SourceAlpha, destination: OneMinusSourceAlpha });
+        params.backface_culling = glium::BackfaceCullingMode::CullCounterClockwise;
+        params.depth = glium::Depth {
+            test: glium::DepthTest::IfLessOrEqual,
+            write: true,
+            .. Default::default()
+        };
+        params.blend = glium::Blend::alpha_blending();
 
         Renderer {
             size: size,
@@ -76,9 +78,9 @@ impl<'a> Renderer<'a> {
 
         // Extract the geometry accumulation buffers and convert into
         // temporary Glium buffers.
-        let vertices = glium::VertexBuffer::new(display, vertices);
+        let vertices = glium::VertexBuffer::new(display, &vertices).unwrap();
         let indices = glium::IndexBuffer::new(
-            display, glium::index::PrimitiveType::TrianglesList, indices);
+            display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
 
         let uniforms = glium::uniforms::UniformsStorage::new("tex",
             glium::uniforms::Sampler(&self.atlas, glium::uniforms::SamplerBehavior {
@@ -104,16 +106,16 @@ impl<'a> Renderer<'a> {
             implement_vertex!(BlitVertex, pos, tex_coord);
 
             glium::VertexBuffer::new(display,
-            vec![
+            &vec![
                 BlitVertex { pos: [sx,    sy   ], tex_coord: [0.0, 0.0] },
                 BlitVertex { pos: [sx+sw, sy   ], tex_coord: [1.0, 0.0] },
                 BlitVertex { pos: [sx+sw, sy+sh], tex_coord: [1.0, 1.0] },
                 BlitVertex { pos: [sx,    sy+sh], tex_coord: [0.0, 1.0] },
-            ])
+            ]).unwrap()
         };
 
         let indices = glium::IndexBuffer::new(display,
-            glium::index::PrimitiveType::TrianglesList, vec![0u16, 1, 2, 0, 2, 3]);
+            glium::index::PrimitiveType::TrianglesList, &vec![0u16, 1, 2, 0, 2, 3]).unwrap();
 
         let mut params: glium::DrawParameters = Default::default();
         // Set an explicit viewport to apply the custom resolution that fixes
@@ -140,7 +142,7 @@ impl<'a> Renderer<'a> {
     /// Call at the start of drawing
     pub fn init(&mut self, display: &glium::Display) {
         let mut target = framebuffer::SimpleFrameBuffer::with_depth_buffer(
-            display, &self.buffer, &self.depth);
+            display, &self.buffer, &self.depth).unwrap();
         target.clear_color(0.0, 0.0, 0.0, 0.0);
         target.clear_depth(1.0);
     }
@@ -151,7 +153,7 @@ impl<'a> Renderer<'a> {
         // Render the graphics to a texture to keep the pixels pure and
         // untainted.
         let mut sprite_target = framebuffer::SimpleFrameBuffer::with_depth_buffer(
-            display, &self.buffer, &self.depth);
+            display, &self.buffer, &self.depth).unwrap();
         self.draw_sprites(display, &mut sprite_target, vertices, indices);
     }
 

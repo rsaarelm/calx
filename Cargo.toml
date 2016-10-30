@@ -20,8 +20,8 @@ num = "0.1"
 vec_map = "0.6"
 image = "0.10"
 nalgebra = "0.2"
-glutin = "0.1"
-glium = "0.5"
+glutin = "0.6"
+glium = "0.15"
 
 [[example]]
 name = "demo"
