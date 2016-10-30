@@ -27,7 +27,7 @@ impl<T: Debug+Copy+SpriteKey> SpriteCache<T> {
     
     /// Try to retrieve an image with the given identifier.
     pub fn get(&self, key: T) -> Option<Image> {
-        self.cache.get(&SpriteCache::index(key)).map(|&x| x)
+        self.cache.get(SpriteCache::index(key)).map(|&x| x)
     }
 
     /// Try to retrieve an image some steps ahead of the given key.
@@ -36,7 +36,7 @@ impl<T: Debug+Copy+SpriteKey> SpriteCache<T> {
     /// consecutive sequences of frames and you don't want to hardcode
     /// every frame as a separate constant.
     pub fn get_nth(&self, key: T, offset: usize) -> Option<Image> {
-        self.cache.get(&(SpriteCache::index(key) + offset)).map(|&x| x)
+        self.cache.get(SpriteCache::index(key) + offset).map(|&x| x)
     }
 
     /// Add an image to the CanvasBuilder atlas for the given identifier key.
@@ -48,7 +48,7 @@ impl<T: Debug+Copy+SpriteKey> SpriteCache<T> {
               I: GenericImage<Pixel=P>
     {
         let idx = SpriteCache::index(key);
-        assert!(self.cache.get(&idx).is_none(), format!("Adding sprite {:?} twice", key));
+        assert!(self.cache.get(idx).is_none(), format!("Adding sprite {:?} twice", key));
 
         self.cache.insert(idx, builder.add_image(offset, image));
     }
