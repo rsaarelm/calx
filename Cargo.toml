@@ -1,6 +1,6 @@
 [package]
 name = "calx"
-version = "0.0.1"
+version = "0.2.0"
 authors = ["Risto Saarelma <risto.saarelma@iki.fi>"]
 description = "Rust game development helper library collection"
 keywords = ["gamedev"]
@@ -12,23 +12,16 @@ path = "calx_macros"
 [dependencies.calx_ecs]
 path = "calx_ecs"
 
-[dependencies.rand]
-
-[dependencies.rustc-serialize]
-
-[dependencies.time]
-
-[dependencies.num]
-
-[dependencies.vec_map]
-
-[dependencies.image]
-
-[dependencies.nalgebra]
-
-[dependencies.glutin]
-
-[dependencies.glium]
+[dependencies]
+rand = "0.3"
+rustc-serialize = "0.3"
+time = "0.1"
+num = "0.1"
+vec_map = "0.1"
+image = "0.3"
+nalgebra = "0.2"
+glutin = "0.1"
+glium = "0.5"
 
 [[example]]
 name = "demo"
