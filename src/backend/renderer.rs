@@ -42,9 +42,10 @@ impl<'a> Renderer<'a> {
             None).unwrap();
         let atlas = texture::Texture2d::new(display, texture_image).unwrap();
 
-        let buffer = texture::Texture2d::new_empty(
+        let buffer = texture::Texture2d::empty_with_format(
             display,
             texture::UncompressedFloatFormat::U8U8U8U8,
+            texture::MipmapsOption::NoMipmap,
             size.0, size.1).unwrap();
         let depth = framebuffer::DepthRenderBuffer::new(
             display, texture::DepthFormat::F32, size.0, size.1).unwrap();
@@ -181,17 +182,22 @@ impl<'a> Renderer<'a> {
     }
 
     pub fn canvas_pixels(&self) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
-        let mut ret = self.buffer.read::<image::DynamicImage>().to_rgb();
+        let image: glium::texture::RawImage2d<u8> = self.buffer.read();
+        let image = image::ImageBuffer::from_raw(image.width,
+                                                   image.height,
+                                                   image.data.into_owned())
+            .unwrap();
+        let mut image = image::DynamicImage::ImageRgba8(image).flipv().to_rgb();
 
         // Convert to sRGB
         // XXX: Probably horribly slow, can we make OpenGL do this?
-        for p in ret.pixels_mut() {
+        for p in image.pixels_mut() {
             p.data[0] = (to_srgb(p.data[0] as f32 / 255.0) * 255.0).round() as u8;
             p.data[1] = (to_srgb(p.data[1] as f32 / 255.0) * 255.0).round() as u8;
             p.data[2] = (to_srgb(p.data[2] as f32 / 255.0) * 255.0).round() as u8;
         }
 
-        ret
+        image
     }
 }
 

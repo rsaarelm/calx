@@ -200,6 +200,9 @@ impl<'a> Canvas<'a> {
         let (w, h) = display.get_framebuffer_dimensions();
 
         let tex_image = image::imageops::flip_vertical(&atlas.image);
+        let image_dimensions = tex_image.dimensions();
+        let tex_image = glium::texture::RawImage2d::from_raw_rgba_reversed(
+            tex_image.clone().into_raw(), image_dimensions);
         let renderer = Renderer::new(size, &display, tex_image, builder.magnify);
 
         Canvas {
